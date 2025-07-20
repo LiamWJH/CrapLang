@@ -1,9 +1,0 @@
-let i = 5
-
-while i < 10
-    let i = i + 1
-
-    if i > 4
-        print "i is more than 4"
-    end
-end

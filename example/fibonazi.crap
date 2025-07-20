@@ -1,0 +1,19 @@
+fnc fib start limit
+    let before = 0
+    let after  = start
+
+    while after < limit
+        print after
+
+
+        let nxt    = before + after
+
+        let before = after
+        let after  = nxt
+        comment: nothing
+    end
+end
+
+
+
+call fib 1 999999999999999999999999999999999999999999999999999
