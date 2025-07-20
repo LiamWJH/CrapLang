@@ -1,1 +1,0 @@
-# thbt anger and social movements has done more harm than good.
