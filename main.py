@@ -1,64 +1,57 @@
-"""
-for now
-"""
+import shlex
 
+# === Your source code in the mini language ===
 temp_code = """
+fnc greet name
+    print name
+end
+
 let i = 0
 
 while i < 10
     let i = i + 1
     if i > 6
-        print "i is more than 6"
+        greet "hi from loop"
     end
 end
 
-print "Buh bye"
+greet "Buh bye"
 """
 
-# === Tokenize each line into words ===
+# === Tokenize code into list of tokens per line ===
 def tokenize_lines(code: str):
-    res = [line.strip().split() for line in code.strip().splitlines()]
-    print("tokenized: ",res)
-    return res
+    return [shlex.split(line, posix=False) for line in code.strip().splitlines()]
 
-# === Parse a single expression like: x + 1 ===
+# === Parse an expression ===
 def parse_expr(tokens):
-    # if just one value (number or variable name)
+
     if len(tokens) == 1:
         token = tokens[0]
 
-        # Check for string
         if token.startswith('"') and token.endswith('"'):
             return ("string", token[1:-1])
-
-        # Try to parse int
+        
         try:
             return int(token)
         except ValueError:
-            return token  # treat as variable name
-
-
-    # if it's a binary operation like x + 1
+            return token
+        
     elif len(tokens) == 3:
         a, op, b = tokens
         return (op, parse_expr([a]), parse_expr([b]))
-
     else:
-        
         joined = " ".join(tokens)
         if joined.startswith('"') and joined.endswith('"'):
             return ('string', joined[1:-1])
-        
         try:
             return int(token)
         except ValueError:
             return token
         raise Exception("Can't parse that expression yet.")
 
-
-# === Parse the entire code into a nested AST ===
+# === Parse a block of code into an AST ===
 def parse_block(lines, i=0):
-    ast = []  # this will contain all parsed instructions for this block
+    ast = []
 
     while i < len(lines):
         tokens = lines[i]
@@ -68,114 +61,124 @@ def parse_block(lines, i=0):
 
         cmd = tokens[0]
 
-        # let x = expr
         if cmd == 'let':
             ast.append(('assign', tokens[1], parse_expr(tokens[3:])))
             i += 1
 
-        # print expr
         elif cmd == 'print':
             ast.append(('print', parse_expr(tokens[1:])))
             i += 1
 
-        # if condition
         elif cmd == 'if':
             condition = parse_expr(tokens[1:])
-            body, i = parse_block(lines, i + 1)  # recursively parse inner block
+            body, i = parse_block(lines, i + 1)
             ast.append(('if', condition, body))
 
-        # while condition
         elif cmd == 'while':
             condition = parse_expr(tokens[1:])
-            body, i = parse_block(lines, i + 1)  # recursively parse inner block
+            body, i = parse_block(lines, i + 1)
             ast.append(('while', condition, body))
 
-        # end → end of this block
-        elif cmd == 'end':
-            return ast, i + 1  # return this block and the next line index
+        elif cmd == 'fnc':
+            name = tokens[1]
+            args = tokens[2:]
+            body, i = parse_block(lines, i + 1)
+            ast.append(('fnc', name, args, body))
 
+        elif cmd == 'end':
+            return ast, i + 1
+        
         else:
-            # fallback for unknown instruction (e.g. function call)
-            ast.append(('call', cmd, [parse_expr(tokens[1:])]))
+            arg_exprs = [parse_expr([arg]) for arg in tokens[1:]]
+            ast.append(('call', cmd, arg_exprs))
             i += 1
 
     return ast, i
 
-# === Evaluate an expression like ('+', 'x', 1) ===
+# === Evaluate an expression ===
 def eval_expr(expr, env):
     if isinstance(expr, int):
         return expr
+    
     if isinstance(expr, tuple) and expr[0] == "string":
         return expr[1]
+    
     if isinstance(expr, str) and expr in env:
         return env[expr]
+    
     if isinstance(expr, str):
         raise Exception(f"Idk this variable: {expr}")
-        
 
-    # otherwise it's a tuple like ('+', 'x', 1)
     op, a, b = expr
     a_val = eval_expr(a, env)
     b_val = eval_expr(b, env)
 
-    if op == '+':
-        return a_val + b_val
-    elif op == '-':
-        return a_val - b_val
-    elif op == '*':
-        return a_val * b_val
-    elif op == '/':
-        return a_val // b_val  # integer division
-    elif op == '%':
-        return a_val % b_val
-    elif op == '<':
-        return a_val < b_val
-    elif op == '>':
-        return a_val > b_val
-    elif op == '<=':
-        return a_val <= b_val
-    elif op == '>=':
-        return a_val >= b_val
-    
-    elif op == '==':
-        return a_val == b_val
-    else:
-        raise Exception(f"Unknown operator: {op}")
+    if op == '+': return a_val + b_val
+    elif op == '-': return a_val - b_val
+    elif op == '*': return a_val * b_val
+    elif op == '/': return a_val // b_val
+    elif op == '%': return a_val % b_val
+    elif op == '<': return a_val < b_val
+    elif op == '>': return a_val > b_val
+    elif op == '<=': return a_val <= b_val
+    elif op == '>=': return a_val >= b_val
+    elif op == '==': return a_val == b_val
+    else: raise Exception(f"Unknown operator: {op}")
 
+# === Function table ===
+functions = {}
 
-# === Run a single instruction ===
+# === Execute a single statement ===
 def run_stmt(stmt, env):
     kind = stmt[0]
 
-    if kind == 'assign':  # let x = expr
+    if kind == 'assign':
         _, name, expr = stmt
         env[name] = eval_expr(expr, env)
 
-    elif kind == 'print':  # print expr
+    elif kind == 'print':
         _, expr = stmt
-        print("OUTPUT:", eval_expr(expr, env))
+        print("<stdout> : ", eval_expr(expr, env))
 
-    elif kind == 'if':  # if expr ... end
+    elif kind == 'if':
         _, condition, body = stmt
         if eval_expr(condition, env):
             run_block(body, env)
 
-    elif kind == 'while':  # while expr ... end
+    elif kind == 'while':
         _, condition, body = stmt
         while eval_expr(condition, env):
             run_block(body, env)
 
+    elif kind == 'fnc':
+        _, name, args, body = stmt
+        functions[name] = (args, body)
+
     elif kind == 'call':
-        print(f"Unknown function call: {stmt}")
+        _, name, arg_exprs = stmt
+        
+        if name not in functions:
+            raise Exception(f"Unknown function: {name}")
+        args, body = functions[name]
 
+        if len(args) != len(arg_exprs):
+            raise Exception(f"{name} expects {len(args)} args, got {len(arg_exprs)}")
 
-# === Run a list of instructions ===
+        arg_vals = [eval_expr(arg_expr, env) for arg_expr in arg_exprs]
+        new_env = env.copy()
+
+        for vars, value in zip(args, arg_vals):
+            new_env[vars] = value
+
+        run_block(body, new_env)
+
+# === Execute a block of statements ===
 def run_block(block, env):
     for stmt in block:
         run_stmt(stmt, env)
 
+# === Main execution ===
 tokens = tokenize_lines(temp_code)
-
 ast, _ = parse_block(tokens)
 env = {}
 run_block(ast, env)

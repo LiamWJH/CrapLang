@@ -1,12 +1,17 @@
-# thbt the social justice movements should encourage the formation of cults of personalities around their leaders
+better empathy
+cost benefit analysis
+identity
+conctruction
+safe space
+unity
+competition 
 
-## case
 
-### Government arguments
- 1. this develops a strong solidarity among people
- 2. idc bruh im brain dead
+problem identification
 
+outside => media,
+politions, => for popular cause
+companies, => 
+audience
 
-### Opposition arguments
- 1. These might lead the original cause of the movement to be dilluted
- 2. The leader might have corrupt personalities
+normies and stuff and social movements 
