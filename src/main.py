@@ -91,6 +91,10 @@ if args.run != None:
                 ast.append(('print', parse_expr(tokens[1:]))) #add print
                 i += 1
 
+            elif cmd == "comment:":
+                pass
+                i += 1
+            
             elif cmd == 'if':
                 condition = parse_expr(tokens[1:]) # get the condition
                 body, i = parse_block(lines, i + 1) # get the body of the scope and sets the index where it ends
@@ -122,9 +126,9 @@ if args.run != None:
             elif cmd == 'end': # which means end of scope
                 return ast, i + 1 # just return the next index
             
-            else:
-                arg_exprs = [parse_expr([arg]) for arg in tokens[1:]] # collects the arguments needed in total
-                ast.append(('call', cmd, arg_exprs))# append the custom 
+            elif cmd == 'call':
+                arg_exprs = [parse_expr([arg]) for arg in tokens[2:]] # collects the arguments needed in total
+                ast.append(('call', tokens[1], arg_exprs))# append the custom 
                 i += 1
 
         return ast, i # just returning results
@@ -173,6 +177,7 @@ if args.run != None:
         elif op == '<=': return a_val <= b_val
         elif op == '>=': return a_val >= b_val
         elif op == '==': return a_val == b_val
+        elif op == '!=': return a_val != b_val
 
         else: raise Exception(f"Unknown operator: {op}")
 
