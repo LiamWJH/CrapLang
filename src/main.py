@@ -42,6 +42,15 @@ if args.run != None:
             if token.startswith('"') and token.endswith('"'):
                 return ("string", token[1:-1]) # this means its a single arg string just returna string
             
+            if token.startswith('[') and token.endswith(']'):
+                return ("list", token)
+            
+            if token.endswith("]") and "[" in token:
+                varname, index = token.split("[")
+                index = index[:-1]
+                
+                return ('index', varname, parse_expr([index]))
+            
             try:
                 return int(token) # try to turn it into a integer if it fails its a float or smth so we just return it
             except ValueError:
@@ -98,6 +107,18 @@ if args.run != None:
                 body, i = parse_block(lines, i + 1) # gets the body and sets the index
                 ast.append(('fnc', name, args, body))# adds to ast
 
+            elif cmd == "push":
+                list_name = tokens[1]
+                value = parse_expr(tokens[2:])
+                ast.append(('push', list_name, value))
+                i += 1
+            
+            elif cmd == "pop":
+                list_name = tokens[1]
+                index = parse_expr(tokens[2:])
+                ast.append(('push', list_name, index))
+                i += 1
+            
             elif cmd == 'end': # which means end of scope
                 return ast, i + 1 # just return the next index
             
@@ -115,6 +136,21 @@ if args.run != None:
         
         if isinstance(expr, tuple) and expr[0] == "string": # ('string', "Blablah") as Blablah
             return expr[1]
+        
+        if isinstance(expr, tuple) and expr[0] == "list":
+            import ast
+            return ast.literal_eval(expr[1])
+        
+        if isinstance(expr, tuple) and expr[0] == "index":
+            _, name, idx = expr
+            
+            idx = eval_expr(idx, env)
+            if name not in env:
+                raise Exception(f"{name} not defined")
+            if not isinstance(env[name], list):
+                raise Exception(f"{name} not a list")
+            return env[name][idx]
+        
         
         if isinstance(expr, str) and expr in env: # variable names as variable values
             return env[expr]
@@ -168,6 +204,18 @@ if args.run != None:
             _, name, args, body = stmt
             functions[name] = (args, body)
 
+        elif kind == "push":
+            _, name, value = stmt
+            value = eval_expr(value, env)
+            if name in env and isinstance(env[name], list):
+                env[name].append(value)
+        
+        elif kind == "pop":
+            _, name, index = stmt
+            index = eval_expr(value, env)
+            if name in env and isinstance(env[name], list):
+                del env[name][index]
+        
         elif kind == 'call': # function call, call and run the function
             _, name, arg_exprs = stmt # get function information
             
