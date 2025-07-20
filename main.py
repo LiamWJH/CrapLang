@@ -1,6 +1,5 @@
 import shlex
 
-# === Your source code in the mini language ===
 temp_code = """
 fnc greet name
     print name
@@ -18,28 +17,27 @@ end
 greet "Buh bye"
 """
 
-# === Tokenize code into list of tokens per line ===
 def tokenize_lines(code: str):
-    return [shlex.split(line, posix=False) for line in code.strip().splitlines()]
+    return [shlex.split(line, posix=False) for line in code.strip().splitlines()] # uses shlex to tokenize buy line by line
 
-# === Parse an expression ===
 def parse_expr(tokens):
 
     if len(tokens) == 1:
         token = tokens[0]
 
         if token.startswith('"') and token.endswith('"'):
-            return ("string", token[1:-1])
+            return ("string", token[1:-1]) # this means its a single arg string just returna string
         
         try:
-            return int(token)
+            return int(token) # try to turn it into a integer if it fails its a float or smth so we just return it
         except ValueError:
             return token
         
-    elif len(tokens) == 3:
-        a, op, b = tokens
-        return (op, parse_expr([a]), parse_expr([b]))
-    else:
+    elif len(tokens) == 3: # this means it is a binary operation like + - * /
+        a, op, b = tokens # divide it into format
+
+        return (op, parse_expr([a]), parse_expr([b])) # return the tuple version in right order
+    else: # which means its a string so return whatever and try to int it
         joined = " ".join(tokens)
         if joined.startswith('"') and joined.endswith('"'):
             return ('string', joined[1:-1])
@@ -53,36 +51,37 @@ def parse_expr(tokens):
 def parse_block(lines, i=0):
     ast = []
 
-    while i < len(lines):
+    while i < len(lines): # for all the lines
         tokens = lines[i]
-        if not tokens:
+        if not tokens: # pass the empty lines
             i += 1
             continue
 
-        cmd = tokens[0]
+        cmd = tokens[0] # get the first item or command from the tokens list
 
+        # break into cases
         if cmd == 'let':
-            ast.append(('assign', tokens[1], parse_expr(tokens[3:])))
+            ast.append(('assign', tokens[1], parse_expr(tokens[3:]))) #add variable assign
             i += 1
 
         elif cmd == 'print':
-            ast.append(('print', parse_expr(tokens[1:])))
+            ast.append(('print', parse_expr(tokens[1:]))) #add print
             i += 1
 
         elif cmd == 'if':
-            condition = parse_expr(tokens[1:])
-            body, i = parse_block(lines, i + 1)
-            ast.append(('if', condition, body))
+            condition = parse_expr(tokens[1:]) # get the condition
+            body, i = parse_block(lines, i + 1) # get the body of the scope and sets the index where it ends
+            ast.append(('if', condition, body))  # adds the full thing
 
-        elif cmd == 'while':
-            condition = parse_expr(tokens[1:])
+        elif cmd == 'while':# almost same as if
+            condition = parse_expr(tokens[1:]) 
             body, i = parse_block(lines, i + 1)
             ast.append(('while', condition, body))
 
         elif cmd == 'fnc':
-            name = tokens[1]
-            args = tokens[2:]
-            body, i = parse_block(lines, i + 1)
+            name = tokens[1] # gets the function name
+            args = tokens[2:] # gets the arguments that can be passed in
+            body, i = parse_block(lines, i + 1) # gets the body and sets the index
             ast.append(('fnc', name, args, body))
 
         elif cmd == 'end':
