@@ -112,6 +112,11 @@ if args.run != None:
                 body, i = parse_block(lines, i + 1) # gets the body and sets the index
                 ast.append(('fnc', name, args, body))# adds to ast
 
+            elif cmd == 'output':
+                insidevar = tokens[1]
+                outsidevar = tokens[2]
+                ast.append(('output', insidevar, outsidevar))
+                i += 1
             elif cmd == "push":
                 list_name = tokens[1]
                 value = parse_expr(tokens[2:])
@@ -154,6 +159,9 @@ if args.run != None:
 
     # === Evaluate an expression ===
     def eval_expr(expr, env):
+        if expr is None:
+            print(env, expr)
+        
         if isinstance(expr, int): # int if int
             return expr
         
@@ -203,7 +211,7 @@ if args.run != None:
     functions = {} # where we store variables
 
     # btw stmt stands for singe-STateMenT
-    def run_stmt(stmt, env):
+    def run_stmt(stmt, env, outer_env):
         kind = stmt[0] # Type of statement kinda like cmd variable in parse func
 
         if kind == 'assign': #variable asssign
@@ -228,6 +236,10 @@ if args.run != None:
             _, name, args, body = stmt
             functions[name] = (args, body)
 
+        elif kind == 'output':
+            _, insidevar, outsidevar = stmt
+            outer_env[outsidevar] = env[insidevar]
+            
         elif kind == "push":
             _, name, value = stmt
             value = eval_expr(value, env)
@@ -258,17 +270,18 @@ if args.run != None:
                 raise Exception(f"{name} expects {len(args)} args, got {len(arg_exprs)}")
 
             arg_vals = [eval_expr(arg_expr, env) for arg_expr in arg_exprs] # evals the given arguments
-            new_env = env.copy() # make a copy oh the env
+            inner_env = {}
 
             for vars, value in zip(args, arg_vals):
-                new_env[vars] = value # assign new values from the function made
+                inner_env[vars] = value # assign new values from the function made
 
-            run_block(body, new_env) # just run the block from function
+            run_block(body, inner_env, env) # just run the block from function
 
     # === Execute a block of statements ===
-    def run_block(block, env):
+    def run_block(block, env, outer_env=None):
+        if outer_env is None: outer_env = env # if empty we need to copy the env for use
         for stmt in block:
-            run_stmt(stmt, env) # lolz
+            run_stmt(stmt, env, outer_env) # lolz
 
     # === Main execution ===
     tokens = tokenize_lines(usercode)
