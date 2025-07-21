@@ -53,5 +53,5 @@ if you have followed the steps of proper installation Above you can just run:
 >comment: blablah
 
 ## Resources
-- [Official Docs Placeholder](https://example.com)
+- [Official Docs Placeholder]([https://example.com](https://github.com/LiamWJH/CrapLang/blob/main/documents/Officialdocumentation))
 Added short description and Resources section to README.md
