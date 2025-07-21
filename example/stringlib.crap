@@ -1,0 +1,7 @@
+have string
+
+let test = "Hello!"
+
+slice test 0 2
+
+print test
