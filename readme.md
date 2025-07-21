@@ -1,4 +1,6 @@
-# Craplang
+# CrapLang
+
+An experimental language for demonstration purposes.
 crap lang is a better version of Crapibara which has a more efficient, performant, and well structured feature which is maintainable,
 it supports functions while loops if statements, variables, lists, operations, stdout,
 it is designed to be minimalistic and TURING COMPLETE
@@ -50,3 +52,6 @@ if you have followed the steps of proper installation Above you can just run:
 **comment**
 >comment: blablah
 
+## Resources
+- [Official Docs Placeholder](https://example.com)
+Added short description and Resources section to README.md
