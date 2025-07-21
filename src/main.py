@@ -31,6 +31,7 @@ if args.run != None:
     greet "Buh bye"
     """
 
+
     def tokenize_lines(code: str):
         return [shlex.split(line, posix=False) for line in code.strip().splitlines()] # uses shlex to tokenize buy line by line
 
@@ -70,7 +71,7 @@ if args.run != None:
                 return token
             raise Exception("Can't parse that expression yet.")
 
-    # === Parse a block of code into an AST ===
+    importlist = []
     def parse_block(lines, i=0):
         ast = []
 
@@ -130,6 +131,24 @@ if args.run != None:
                 arg_exprs = [parse_expr([arg]) for arg in tokens[2:]] # collects the arguments needed in total
                 ast.append(('call', tokens[1], arg_exprs))# append the custom 
                 i += 1
+
+            elif cmd == 'have':
+                libname = tokens[1]
+                ast.append(('have', libname))
+
+                if libname == "string":
+                    importlist.append("string")
+                    from LIB_string import stringslices
+                i += 1
+
+            else:
+                if cmd == "slice":
+                    if "string" in importlist:
+                        ast.append(('slice', tokens[1], tokens[2], tokens[3]))
+                        i += 1
+                    else:
+                        raise Exception("string library was not imported")
+                            
 
         return ast, i # just returning results
 
@@ -221,6 +240,13 @@ if args.run != None:
             if name in env and isinstance(env[name], list):
                 del env[name][index]
         
+        elif kind == "slice":
+            if "string" in importlist:
+                from LIB_string import stringslices
+                
+                _, varname, idx1, idx2 = stmt
+                env[varname] = stringslices(env[varname], int(idx1), int(idx2))
+
         elif kind == 'call': # function call, call and run the function
             _, name, arg_exprs = stmt # get function information
             
