@@ -1,0 +1,10 @@
+let fncout = 0
+
+fnc add num
+    let num = num + 1
+    output num fncout
+end
+
+call add 2
+
+print fncout
