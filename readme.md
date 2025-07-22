@@ -29,29 +29,5 @@ if you have followed the steps of proper installation Above you can just run:
 if you have followed the steps of proper installation Above you can just run:
 `main.py -r filename.crap` or `main.py --run filename.crap`
 
-## Syntax
-
-**var declare**
-> let x = 123
-
-**if, while, fnc**
-> if 1 < 2
-
-> while 1 < 2
-
-> fnc dosmth var1 var2
-
-**print**
-> print "Hello world"
-
-**end**
-> if 1 < 2
-> ----print "Hello"
-> end
-
-**comment**
->comment: blablah
-
-## Resources
+## Resources (Sytax and more)
 - [Official Docs](https://github.com/LiamWJH/CrapLang/blob/main/documents/Officialdocumentation)
-Added short description and Resources section to README.md
