@@ -61,7 +61,7 @@ if args.run != None:
             a, op, b = tokens # divide it into format
 
             return (op, parse_expr([a]), parse_expr([b])) # return the tuple version in right order
-        else: # which means its a string so return whatever and try to int it
+        else: # why then
             joined = " ".join(tokens)
             if joined.startswith('"') and joined.endswith('"'):
                 return ('string', joined[1:-1])
@@ -93,7 +93,7 @@ if args.run != None:
                 i += 1
             
             elif cmd == 'input': # meh meh  mmeh for now lets say inpput does : input vartostore text
-                ast.append(('input', tokens[1], tokens[2]))
+                ast.append(('input', tokens[1], parse_expr([tokens[2]])))
                 i += 1
 
             elif cmd == "comment:":
@@ -148,6 +148,11 @@ if args.run != None:
                 if libname == "string":
                     importlist.append("string")
                     from LIB_string import stringslices
+                
+                if libname == "fileio":
+                    importlist.append("fileio")
+                    from LIB_fileio import readfile, writetofile, appendtofile
+                    
                 i += 1
 
             else:
@@ -157,7 +162,19 @@ if args.run != None:
                         i += 1
                     else:
                         raise Exception("string library was not imported")
-                            
+                
+                if cmd == "readfile":
+                    if "fileio" in importlist: #file name #varname
+                        ast.append(('readfile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
+                        i += 1
+                if cmd == "writefile":
+                    if "fileio" in importlist:
+                        ast.append(('writefile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
+                        i += 1
+                if cmd == "appendfile":
+                    if "fileio" in importlist:
+                        ast.append(('appendfile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
+                        i += 1
 
         return ast, i # just returning results
 
@@ -171,6 +188,7 @@ if args.run != None:
         
         if isinstance(expr, tuple) and expr[0] == "string": # ('string', "Blablah") as Blablah
             return expr[1]
+        
         
         if isinstance(expr, tuple) and expr[0] == "list":
             import ast
@@ -228,7 +246,7 @@ if args.run != None:
 
         elif kind == 'input':
             _, storevar, question = stmt
-            env[storevar] = input(f"<stdin> : {question}")
+            env[storevar] = input(f"<stdin> : {eval_expr(question, env)}")
         
         elif kind == 'if': #run if statement
             _, condition, body = stmt
@@ -266,6 +284,27 @@ if args.run != None:
                 
                 _, varname, idx1, idx2 = stmt
                 env[varname] = stringslices(env[varname], int(idx1), int(idx2))
+        elif kind == "readfile":
+            if "fileio" in importlist:
+                from LIB_fileio import readfile
+                _, filename, storevar = stmt
+                
+                env[storevar] = readfile(eval_expr(filename, env))
+                
+
+        elif kind == "writefile":
+            if "fileio" in importlist:
+                from LIB_fileio import writetofile
+                _, filename, content = stmt
+                writetofile(eval_expr(filename, env), eval_expr(content, env))
+
+        elif kind == "appendfile":
+            if "fileio" in importlist:
+                from LIB_fileio import appendtofile
+                _, filename, content = stmt
+
+                appendtofile(eval_expr(filename, env), eval_expr(content, env))
+
 
         elif kind == 'call': # function call, call and run the function
             _, name, arg_exprs = stmt # get function information

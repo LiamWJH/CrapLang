@@ -1,0 +1,13 @@
+have fileio
+
+
+let file = ""
+let filename = ""
+
+input filename "Filename: "
+
+readfile filename file
+
+
+
+print file
