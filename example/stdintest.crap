@@ -1,0 +1,5 @@
+let userinput = 0
+
+input userinput "Whats your name?"
+
+print userinput

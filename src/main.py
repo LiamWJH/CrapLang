@@ -91,6 +91,10 @@ if args.run != None:
             elif cmd == 'print':
                 ast.append(('print', parse_expr(tokens[1:]))) #add print
                 i += 1
+            
+            elif cmd == 'input': # meh meh  mmeh for now lets say inpput does : input vartostore text
+                ast.append(('input', tokens[1], tokens[2]))
+                i += 1
 
             elif cmd == "comment:":
                 pass
@@ -222,6 +226,10 @@ if args.run != None:
             _, expr = stmt
             print("<stdout> : ", eval_expr(expr, env))
 
+        elif kind == 'input':
+            _, storevar, question = stmt
+            env[storevar] = input(f"<stdin> : {question}")
+        
         elif kind == 'if': #run if statement
             _, condition, body = stmt
             if eval_expr(condition, env):
