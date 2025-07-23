@@ -18,7 +18,7 @@ pyinstaller main.py --onefile --hidden-import=LIB_{libraryNAME}
 
 then get the result in the dist folder and put it in the root dist folder for the file structure
 
-## copy and paste current library build command: (CPCLBC)
+## **copy and paste current library build command** : (CPCLBC)
 
 ```
 pyinstaller main.py --onefile --hidden-import=LIB_fileio --hidden-import=LIB_rick --hidden-import=LIB_string
