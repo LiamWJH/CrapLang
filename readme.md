@@ -1,9 +1,9 @@
 # CrapLang
 
-An experimental language for demonstration purposes.
+A language for simple project.
 crap lang is a better version of Crapibara which has a more efficient, performant, and well structured feature which is maintainable,
 it supports functions while loops if statements, variables, lists, operations, stdout,
-it is designed to be minimalistic and TURING COMPLETE
+it is designed to be minimalistic and **TURING COMPLETE**
 
 ## Installation
 This is a simple instruction manual for the Crap Language, it branches out into two parts, dev version and the norm version
