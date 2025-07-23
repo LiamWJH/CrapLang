@@ -165,7 +165,7 @@ print content  # Hello! Goodbye!
 
 ### `rickroll`
 
-Play a built-in ASCII rickroll animation.
+Yes
 
 ```crap
 have rick
