@@ -7,3 +7,5 @@ put the name you want to be **called as** and the link to your **github account*
 Current contributers:
 
 [**Safiraromao**](https://github.com/Safiraromao) - documenatation :)
+
+[**erri4**](https://github.com/erri4) - codes :)
