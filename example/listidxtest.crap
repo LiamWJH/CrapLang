@@ -1,0 +1,7 @@
+let array = [1,2,3,4]
+
+let array[0] = 6
+
+let val = array[0]
+
+print array
