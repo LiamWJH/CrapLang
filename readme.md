@@ -29,5 +29,5 @@ if you have followed the steps of proper installation Above you can just run:
 if you have followed the steps of proper installation Above you can just run:
 `main.py -r filename.crap` or `main.py --run filename.crap`
 
-## Resources (Sytax and more)
+## Resources (Syntax and more)
 - [Official Docs](https://github.com/LiamWJH/CrapLang/blob/main/documents/Officialdocumentation)
