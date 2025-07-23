@@ -126,10 +126,18 @@ def parse_block(lines, i=0):
             if libname == "fileio":
                 importlist.append("fileio")
                 from LIB_fileio import readfile, writetofile, appendtofile
+            
+            if libname == "rick":
+                importlist.append("rick")
+                from LIB_rick import rickroll
                 
             i += 1
 
         else:
+            ####################################
+            #	str lib
+            ####################################
+            
             if cmd == "slice":
                 if "string" in importlist:
                     ast.append(('slice', tokens[1], tokens[2], tokens[3]))
@@ -137,19 +145,42 @@ def parse_block(lines, i=0):
                 else:
                     raise Exception("string library was not imported")
             
+            ####################################
+            #	fileio
+            ####################################
+            
             if cmd == "readfile":
                 if "fileio" in importlist: #file name #varname
                     ast.append(('readfile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
                     i += 1
+                else:
+                    raise Exception("fileio library has not yet been imported")
             if cmd == "writefile":
                 if "fileio" in importlist:
                     ast.append(('writefile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
                     i += 1
+                else:
+                    raise Exception("fileio library has not yet been imported")
             if cmd == "appendfile":
                 if "fileio" in importlist:
                     ast.append(('appendfile', parse_expr([tokens[1]]), parse_expr([tokens[2]])))
                     i += 1
-
+                else:
+                    raise Exception("fileio library has not yet been imported")
+                
+            ####################################
+            #	rick
+            ####################################
+            
+            if cmd == "rickroll":
+                if "rick" in importlist:
+                    ast.append(('rickroll', ""))
+                    i += 1
+                else:
+                    raise Exception("sigma brainrot has not been imported")
+            
+            
+            
     return ast, i # just returning results
 
 # === Evaluate an expression ===
@@ -284,7 +315,11 @@ def run_stmt(stmt, env, outer_env):
 
             appendtofile(eval_expr(filename, env), eval_expr(content, env))
 
-
+    elif kind == "rickroll":
+        if "rick" in importlist:
+            from LIB_rick import rickroll
+            rickroll()
+    
     elif kind == 'call': # function call, call and run the function
         _, name, arg_exprs = stmt # get function information
         
